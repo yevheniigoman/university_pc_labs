@@ -4,8 +4,9 @@ import java.util.Random;
 
 public class Matrix {
     public static void main(String[] args) {
-        int matrixDim = 5;
-        int numThreads = 3;
+        CommandLineOptions options = CommandLineOptionsParser.parse(args);
+        int matrixDim = options.dim();
+        int numThreads = options.threads();
 
         // матриця зберігається як одновимірний масив, згрупований за стовпцями
         List<Integer> matrix = new ArrayList<>(matrixDim * matrixDim);
@@ -15,15 +16,23 @@ public class Matrix {
             matrix.add(rand.nextInt(0, 100));
         }
 
-        printMatrix(matrix, matrixDim);
-        System.out.println();
+        if (options.print()) {
+            printMatrix(matrix, matrixDim);
+            System.out.println();
+        }
 
         long startTime = System.nanoTime();
-        // fillSequentially(matrix, matrixDim);
-        fillParallel(matrix, matrixDim, numThreads);
+        if (numThreads == 1) {
+            fillSequentially(matrix, matrixDim);
+        } else {
+            fillParallel(matrix, matrixDim, numThreads);
+        }
         long elapsedTime = System.nanoTime() - startTime;
 
-        printMatrix(matrix, matrixDim);
+        if (options.print()) {
+            printMatrix(matrix, matrixDim);
+        }
+
         System.out.print(elapsedTime);
     }
 

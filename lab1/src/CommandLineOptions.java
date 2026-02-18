@@ -1,0 +1,1 @@
+public record CommandLineOptions(int dim, int threads, boolean print) {}
