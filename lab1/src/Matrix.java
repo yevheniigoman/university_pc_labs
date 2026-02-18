@@ -5,6 +5,7 @@ import java.util.Random;
 public class Matrix {
     public static void main(String[] args) {
         int matrixDim = 5;
+        int numThreads = 3;
 
         // матриця зберігається як одновимірний масив, згрупований за стовпцями
         List<Integer> matrix = new ArrayList<>(matrixDim * matrixDim);
@@ -18,7 +19,8 @@ public class Matrix {
         System.out.println();
 
         long startTime = System.nanoTime();
-        fillSequentially(matrix, matrixDim);
+        // fillSequentially(matrix, matrixDim);
+        fillParallel(matrix, matrixDim, numThreads);
         long elapsedTime = System.nanoTime() - startTime;
 
         printMatrix(matrix, matrixDim);
@@ -33,6 +35,33 @@ public class Matrix {
             }
             matrix.set(col * matrixDim + col, sum);
             sum = 0;
+        }
+    }
+
+    public static void fillParallel(final List<Integer> matrix, int matrixDim, int numThreads) {
+        numThreads = Math.min(numThreads, matrixDim);
+        List<Thread> threads = new ArrayList<>(numThreads);
+
+        // розподілення стовпців матриці між потоками
+        int colsPerThread = matrixDim / numThreads;
+        int fromColumn, toColumn;
+        for (int i = 0; i < numThreads; i++) {
+            fromColumn = i * colsPerThread;
+            toColumn = (i == numThreads - 1) ? matrixDim : (i + 1) * colsPerThread;
+            Runnable task = new FillMatrixColumnsTask(matrix, matrixDim, fromColumn, toColumn);
+            threads.add(new Thread(task));
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
