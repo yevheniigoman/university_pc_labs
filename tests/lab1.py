@@ -28,7 +28,7 @@ def measure_time(matrix_size: int, num_threads: int, num_iters: int) -> float:
     повторює їх <num_iters> разів та повертає середній час виконання у секундах.
     """
     elapsed_time = 0.0
-    command = "java ../src/Matrix.java --dim {} --threads {}"
+    command = "java ../lab1/src/Matrix.java --dim {} --threads {}"
     for _ in range(num_iters):
         process = subprocess.run(
             command.format(matrix_size, num_threads),
